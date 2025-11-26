@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 from controllers.user_bp import user_bp
+from controllers.supplier_bp import supplier_bp
 from lib.db import initialize_db_tables
 
 app = Flask(__name__)
@@ -11,6 +12,7 @@ app.config.update(
 initialize_db_tables()
 
 app.register_blueprint(user_bp)
+app.register_blueprint(supplier_bp, url_prefix='/suppliers')
 
 @app.route("/")
 def hello_world():

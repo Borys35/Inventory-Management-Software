@@ -19,6 +19,24 @@ class Supplier:
             self.conn.rollback()
             print(f"Error while creating supplier: {e}")
             return None
+        
+    def update_supplier(self, id, name, contact_email, phone, address):
+        try:
+            cur = self.conn.cursor()
+            query = """
+                UPDATE suppliers
+                SET name = %s, contact_email = %s, phone = %s, address = %s
+                WHERE id = %s;
+            """
+            cur.execute(query, (name, contact_email, phone, address, id))
+            updated_id = cur.fetchone()[0]
+            self.conn.commit()
+            cur.close()
+            return updated_id
+        except Exception as e:
+            self.conn.rollback()
+            print(f"Error while updating supplier: {e}")
+            return None
     
     def get_supplier_by_id(self, id):
         try:
