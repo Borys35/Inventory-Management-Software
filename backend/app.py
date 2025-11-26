@@ -10,7 +10,12 @@ conn = psycopg2.connect(database="inventory_db", user="postgres",
 
 cur = conn.cursor()
 
-init_tables(cur)
+try:
+    init_tables(cur)
+    conn.commit()
+except Exception as e:
+    print(f"Error creating tables: {e}")
+    conn.rollback()
 
 app.register_blueprint(user_blueprint)
 

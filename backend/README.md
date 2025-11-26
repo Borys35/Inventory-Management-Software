@@ -7,5 +7,7 @@ Requirements:
 Local PostgreSQL:
 - name: postres
 - password: admin
-psql -U postgres
-create database inventory_db;
+
+Initializing Database:
+- psql -U postgres
+- create database inventory_db;
