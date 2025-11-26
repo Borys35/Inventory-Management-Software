@@ -1,5 +1,6 @@
 from flask import Blueprint, session, redirect, request, render_template, flash, g
 from lib.db import get_db_connection
+from lib.auth_middleware import logout_required, login_required
 from models.user import User
 
 user_bp = Blueprint('user', __name__)
@@ -19,6 +20,7 @@ def load_logged_in_user():
         g.user = user
 
 @user_bp.route("/register", methods=['GET', 'POST'])
+@logout_required
 def register():
     if request.method == 'GET':
         return render_template("register.html")
@@ -45,6 +47,7 @@ def register():
     return None
 
 @user_bp.route("/login", methods=['GET', 'POST'])
+@logout_required
 def login():
     if request.method == 'GET':
         return render_template("login.html")
@@ -70,6 +73,7 @@ def login():
             return render_template('login.html'), 400
 
 @user_bp.route("/logout", methods=['GET'])
+@login_required
 def logout():
     session.clear()
     return redirect("/")
