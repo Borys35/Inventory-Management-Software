@@ -37,6 +37,23 @@ class Supplier:
             self.conn.rollback()
             print(f"Error while updating supplier: {e}")
             return None
+        
+    def delete_supplier(self, id):
+        try:
+            cur = self.conn.cursor()
+            query = """
+                DELETE FROM suppliers
+                WHERE id = %s;
+            """
+            cur.execute(query, (id, ))
+            deleted_id = cur.fetchone()[0]
+            self.conn.commit()
+            cur.close()
+            return deleted_id
+        except Exception as e:
+            self.conn.rollback()
+            print(f"Error while deleting supplier: {e}")
+            return None
     
     def get_supplier_by_id(self, id):
         try:
