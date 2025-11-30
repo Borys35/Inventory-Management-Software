@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Manufacturers{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <form method="POST" action="{{ url_for('manufacturer.create') }}">
+        <label>
+            Name:
+            <input type="text" name="name" />
+        </label>
+        <br />
+        <label>
+            Contact e-mail:
+            <input type="text" name="contact_email" />
+        </label>
+        <br />
+        <label>
+            Phone:
+            <input type="text" name="phone" />
+        </label>
+        <br />
+        <label>
+            Address:
+            <textarea type="text" name="address"></textarea>
+        </label>
+        <br />
+        <input type="submit" value="Create manufacturer" />
+    </form>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Contact E-mail</th>
+            <th>Phone</th>
+            <th>Address</th>
+        </tr>
+        {% for manufacturer in manufacturers %}
+            <tr>
+                <td>{{ manufacturer.id }}</td>
+                <td>{{ manufacturer.name }}</td>
+                <td>{{ manufacturer.contact_email }}</td>
+                <td>{{ manufacturer.phone }}</td>
+                <td>{{ manufacturer.address }}</td>
+                <td><a href="{{url_for('manufacturer.get_one', manufacturer_id = manufacturer.id)}}">View details</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
