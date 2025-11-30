@@ -23,7 +23,7 @@
         <br />
         <label>
             Address:
-            <input type="text" name="address" />
+            <textarea type="text" name="address"></textarea>
         </label>
         <br />
         <input type="submit" value="Create Supplier" />
@@ -44,6 +44,7 @@
                 <td>{{ supplier.contact_email }}</td>
                 <td>{{ supplier.phone }}</td>
                 <td>{{ supplier.address }}</td>
+                <td><a href="{{url_for('supplier.get_one', supplier_id = supplier.id)}}">View details</a></td>
             </tr>
         {% endfor %}
     </table>

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Suppliers{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <form method="POST" action="{{ url_for('supplier.update', supplier_id=supplier.id) }}">
+        <label>
+            Name:
+            <input type="text" name="name" value="{{ supplier.name }}" />
+        </label>
+        <br />
+        <label>
+            Contact e-mail:
+            <input type="text" name="contact_email" value="{{ supplier.contact_email }}" />
+        </label>
+        <br />
+        <label>
+            Phone:
+            <input type="text" name="phone" value="{{ supplier.phone }}" />
+        </label>
+        <br />
+        <label>
+            Address:
+            <textarea type="text" name="address">{{ supplier.address }}</textarea>
+        </label>
+        <br />
+        <input type="submit" value="Update Supplier" />
+    </form>
+
+    <form method="POST" action="{{ url_for('supplier.delete', supplier_id=supplier.id) }}">
+        <input type="submit" value="Delete Supplier" />
+    </form>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Contact E-mail</th>
+            <th>Phone</th>
+            <th>Address</th>
+        </tr>
+        <tr>
+            <td>{{ supplier.id }}</td>
+            <td>{{ supplier.name }}</td>
+            <td>{{ supplier.contact_email }}</td>
+            <td>{{ supplier.phone }}</td>
+            <td>{{ supplier.address }}</td>
+        </tr>
+    </table>
+{% endblock %}
