@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Products{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <form method="POST" action="{{ url_for('product.update', product_id=product.id) }}">
+    
+        <label>
+            Product Name:
+            <input type="text" name="name" value="{{ product.name }}" required />
+        </label>
+        <br />
+        
+        <label>
+            SKU (Stock Keeping Unit):
+            <input type="text" name="sku" value="{{ product.sku }}" required />
+        </label>
+        <br />
+        
+        <label>
+            Description:
+            <textarea name="description" rows="4">{{ product.description }}</textarea>
+        </label>
+        <br />
+        
+        <label>
+            Supplier ID:
+            <select name="supplier_id">
+                {% for supplier in suppliers %}
+                    <option value="{{ supplier.id }}" selected="{{ supplier.id == product.supplier_id }}">{{ supplier.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <br />
+        
+        <label>
+            Manufacturer ID:
+            <select name="manufacturer_id">
+                {% for manufacturer in manufacturers %}
+                    <option value="{{ manufacturer.id }}" selected="{{ manufacturer.id == product.manufacturer_id }}">{{ manufacturer.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <br />
+        
+        <label>
+            Reorder Level:
+            <input type="number" name="reorder_level" value="{{ product.reorder_level }}" min="0" />
+        </label>
+        <br />
+        
+        <input type="submit" value="Update Product" />
+    </form>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>SKU</th>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Description</th>
+            <th>Specifications</th>
+            <th>Supplier</th>
+            <th>Manufacturer</th>
+            <th>Reorder level</th>
+            <th>Created At</th>
+        </tr>
+        <tr>
+            <td>{{ product.id }}</td>
+            <td>{{ product.sku }}</td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.quantity }}</td>
+            <td>{{ product.description }}</td>
+            <td>{{ product.specifications }}</td>
+            <td>{{ product.supplier_id }}</td>
+            <td>{{ product.manufacturer_id }}</td>
+            <td>{{ product.reorder_level }}</td>
+            <td>{{ product.created_at }}</td>
+        </tr>
+    </table>
+{% endblock %}

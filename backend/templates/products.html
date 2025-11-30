@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Products{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <form method="POST" action="{{ url_for('product.create') }}">
+    
+        <label>
+            Product Name:
+            <input type="text" name="name" required />
+        </label>
+        <br />
+        
+        <label>
+            SKU (Stock Keeping Unit):
+            <input type="text" name="sku" required />
+        </label>
+        <br />
+        
+        <label>
+            Description:
+            <textarea name="description" rows="4"></textarea>
+        </label>
+        <br />
+        
+        <label>
+            Supplier ID:
+            <select name="supplier_id">
+                {% for supplier in suppliers %}
+                    <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <br />
+        
+        <label>
+            Manufacturer ID:
+            <select name="manufacturer_id">
+                {% for manufacturer in manufacturers %}
+                    <option value="{{ manufacturer.id }}">{{ manufacturer.name }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <br />
+        
+        <label>
+            Reorder Level:
+            <input type="number" name="reorder_level" value="10" min="0" />
+        </label>
+        <br />
+        
+        <input type="submit" value="Create Product" />
+    </form>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>SKU</th>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Description</th>
+            <th>Specifications</th>
+            <th>Supplier</th>
+            <th>Manufacturer</th>
+            <th>Reorder level</th>
+            <th>Created At</th>
+        </tr>
+        {% for product in products %}
+            <tr>
+                <td>{{ product.id }}</td>
+                <td>{{ product.sku }}</td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.quantity }}</td>
+                <td>{{ product.description }}</td>
+                <td>{{ product.specifications }}</td>
+                <td>{{ product.supplier_id }}</td>
+                <td>{{ product.manufacturer_id }}</td>
+                <td>{{ product.reorder_level }}</td>
+                <td>{{ product.created_at }}</td>
+                <td><a href="{{url_for('product.get_one', product_id = product.id)}}">View details</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
