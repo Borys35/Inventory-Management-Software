@@ -54,6 +54,10 @@
         <input type="submit" value="Update Product" />
     </form>
 
+    <form method="POST" action="{{ url_for('product.delete', product_id=product.id) }}">
+        <input type="submit" value="Delete product" />
+    </form>
+
     <table>
         <tr>
             <th>ID</th>

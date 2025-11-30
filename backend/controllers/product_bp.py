@@ -64,7 +64,47 @@ def create():
         flash("Incorrect data")
         return "Product create failed", 400
 
-@product_bp.route("/update", methods=['POST'])
+@product_bp.route("/delete/<product_id>", methods=['POST'])
 @login_required
-def update():
-    pass
+def delete(product_id):
+    conn = get_db_connection()
+    product_model = Product(conn)
+
+    product_id = product_model.delete_product(
+        product_id
+    )
+
+    conn.close()
+
+    if product_id:
+        flash(f"Product (ID={product_id}) deleted successfully")
+        return redirect(url_for('product.get_all'))
+    else:
+        flash("Incorrect data")
+        return "Product delete failed", 400
+
+@product_bp.route("/update/<product_id>", methods=['POST'])
+@login_required
+def update(product_id):
+    data = request.form
+    conn = get_db_connection()
+    product_model = Product(conn)
+
+    product_id = product_model.update_product(
+        product_id,
+        data.get('sku'),
+        data.get('name'),
+        data.get('description'),
+        data.get('supplier_id'),
+        data.get('product_id'),
+        data.get('reorder_level')
+    )
+
+    conn.close()
+
+    if product_id:
+        flash(f"Product (ID={product_id}) updated successfully")
+        return redirect(url_for('product.get_one', product_id=product_id))
+    else:
+        flash("Incorrect data")
+        return "Product update failed", 400
