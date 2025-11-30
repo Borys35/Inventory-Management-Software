@@ -26,7 +26,8 @@ class Supplier:
             query = """
                 UPDATE suppliers
                 SET name = %s, contact_email = %s, phone = %s, address = %s
-                WHERE id = %s;
+                WHERE id = %s
+                RETURNING id;
             """
             cur.execute(query, (name, contact_email, phone, address, id))
             updated_id = cur.fetchone()[0]
@@ -43,7 +44,8 @@ class Supplier:
             cur = self.conn.cursor()
             query = """
                 DELETE FROM suppliers
-                WHERE id = %s;
+                WHERE id = %s
+                RETURNING id;
             """
             cur.execute(query, (id, ))
             deleted_id = cur.fetchone()[0]
