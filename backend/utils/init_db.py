@@ -182,6 +182,171 @@ def init_tables(cur):
     """)
 
 
-    # Implement TRIGGER, VIEW, PROCEDURE, FUNCTION, TRANSACTION
-    
+    # Implementacja TRIGGER, VIEW, PROCEDURE, FUNCTION, TRANSACTION
+
+    # FUNCTION i TRIGGER
+    # KROK 1: Funkcja obsługująca logikę (Wersja Full: Przyjęcia + Wydania FIFO)
+    cur.execute("""
+        CREATE OR REPLACE FUNCTION create_batch_on_completion_func()
+        RETURNS TRIGGER AS $$
+        DECLARE
+            v_row RECORD;          -- Zmienna do iteracji po produktach w zamówieniu
+            v_batch RECORD;        -- Zmienna do iteracji po partiach magazynowych
+            v_remaining_qty INT;   -- Ile jeszcze musimy 'zdjąć' z magazynu
+            v_deduct_qty INT;      -- Ile zdejmujemy z konkretnej partii
+        BEGIN
+            -- Uruchamiamy tylko gdy status zmienił się na 'completed'
+            IF NEW.delivery_status = 'completed' AND (OLD.delivery_status IS DISTINCT FROM 'completed') THEN
+                
+                -- ====================================================
+                -- SCENARIUSZ 1: PRZYJĘCIA (INBOUND) -> Tworzymy nowe partie
+                -- ====================================================
+                IF (NEW.transaction_type = 'purchase_order') OR 
+                   (NEW.transaction_type = 'return' AND NEW.customer_id IS NOT NULL) OR
+                   (NEW.transaction_type = 'adjustment' AND NEW.transaction_type != 'sales_order') THEN -- Uproszczenie dla adjustment
+                   
+                    INSERT INTO product_batches (product_id, delivery_id, quantity, single_price, transaction_date)
+                    SELECT 
+                        product_id, 
+                        delivery_id, 
+                        quantity, 
+                        single_price,
+                        CURRENT_TIMESTAMP
+                    FROM product_rows
+                    WHERE delivery_id = NEW.id;
+
+                -- ====================================================
+                -- SCENARIUSZ 2: ROZCHODY (OUTBOUND) -> Zdejmujemy ze stanu (FIFO)
+                -- ====================================================
+                ELSIF (NEW.transaction_type = 'sales_order') OR 
+                      (NEW.transaction_type = 'transfer') OR 
+                      (NEW.transaction_type = 'return' AND NEW.supplier_id IS NOT NULL) THEN
+                    
+                    -- Pętla po wszystkich produktach w tym zamówieniu
+                    FOR v_row IN SELECT * FROM product_rows WHERE delivery_id = NEW.id LOOP
+                        v_remaining_qty := v_row.quantity;
+
+                        -- Szukamy dostępnych partii dla produktu (sortujemy od najstarszej - FIFO)
+                        -- FOR UPDATE blokuje rekordy, aby nikt inny ich nie wykupił w trakcie tej transakcji
+                        FOR v_batch IN 
+                            SELECT * FROM product_batches 
+                            WHERE product_id = v_row.product_id AND quantity > 0 
+                            ORDER BY transaction_date ASC, id ASC
+                            FOR UPDATE 
+                        LOOP
+                            -- Jeśli zaspokoiliśmy potrzebę, przerywamy pętlę partii
+                            IF v_remaining_qty <= 0 THEN
+                                EXIT;
+                            END IF;
+
+                            IF v_batch.quantity >= v_remaining_qty THEN
+                                -- Przypadek A: Partia ma wystarczająco dużo towaru
+                                UPDATE product_batches 
+                                SET quantity = quantity - v_remaining_qty 
+                                WHERE id = v_batch.id;
+                                
+                                v_remaining_qty := 0; -- Wszystko wydano
+                            ELSE
+                                -- Przypadek B: Partia ma za mało, bierzemy wszystko co jest i szukamy dalej
+                                v_deduct_qty := v_batch.quantity;
+                                
+                                UPDATE product_batches 
+                                SET quantity = 0 
+                                WHERE id = v_batch.id;
+                                
+                                v_remaining_qty := v_remaining_qty - v_deduct_qty;
+                            END IF;
+                        END LOOP;
+
+                        -- WALIDACJA: Jeśli po sprawdzeniu wszystkich partii nadal brakuje towaru
+                        IF v_remaining_qty > 0 THEN
+                            RAISE EXCEPTION 'Błąd magazynowy: Brak wystarczającej ilości towaru dla produktu ID: % (Brakuje: %)', v_row.product_id, v_remaining_qty;
+                        END IF;
+
+                    END LOOP;
+                END IF;
+                
+            END IF;
+
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+    """)
+
+    # KROK 2: Przypisanie Triggera do tabeli deliveries
+    # Trigger uruchamia się PO (AFTER) aktualizacji (UPDATE) rekordu.
+    cur.execute("""
+        DROP TRIGGER IF EXISTS trg_create_batch_on_completion ON deliveries;
+        
+        CREATE TRIGGER trg_create_batch_on_completion
+        AFTER UPDATE ON deliveries
+        FOR EACH ROW
+        EXECUTE FUNCTION create_batch_on_completion_func();
+    """)
+
+    # VIEW
+    cur.execute("""
+        CREATE OR REPLACE VIEW v_stock_levels AS
+        SELECT 
+            p.id AS product_id,
+            p.sku,
+            p.name AS product_name,
+            COALESCE(SUM(pb.quantity), 0) AS total_quantity, -- COALESCE zamienia NULL na 0
+            p.reorder_level,
+            m.name AS manufacturer_name
+        FROM products p
+        LEFT JOIN product_batches pb ON p.id = pb.product_id
+        LEFT JOIN manufacturers m ON p.manufacturer_id = m.id
+        GROUP BY p.id, p.sku, p.name, p.reorder_level, m.name;
+    """)
+
+    cur.execute("""
+        CREATE OR REPLACE VIEW v_products_to_reorder AS
+        SELECT *
+        FROM v_stock_levels
+        WHERE total_quantity <= reorder_level;
+    """)
+
+    cur.execute("""
+        CREATE OR REPLACE VIEW v_inventory_value AS
+        SELECT 
+            p.name AS product_name,
+            SUM(pb.quantity) AS quantity,
+            -- Średnia ważona cena (opcjonalnie)
+            ROUND(SUM(pb.quantity * pb.single_price) / NULLIF(SUM(pb.quantity), 0), 2) AS avg_price,
+            -- Łączna wartość towaru
+            SUM(pb.quantity * pb.single_price) AS total_value
+        FROM product_batches pb
+        JOIN products p ON pb.product_id = p.id
+        GROUP BY p.id, p.name;
+    """)
+
+    # PROCEDURE
+    cur.execute("""
+        CREATE OR REPLACE PROCEDURE cancel_completed_delivery(p_delivery_id INT)
+        LANGUAGE plpgsql
+        AS $$
+        BEGIN
+            -- 1. Sprawdź czy dostawa istnieje i jest zakończona
+            IF NOT EXISTS (SELECT 1 FROM deliveries WHERE id = p_delivery_id AND delivery_status = 'completed') THEN
+                RAISE EXCEPTION 'Dostawa nie istnieje lub nie jest zakończona.';
+            END IF;
+
+            -- 2. Cofnij skutki magazynowe (Usuń partie towaru powstałe z tej dostawy)
+            -- UWAGA: To zadziała tylko dla przyjęć (purchase_order). 
+            -- Cofanie wydań (sales) jest trudniejsze, bo towar już mógł wyjść.
+            DELETE FROM product_batches 
+            WHERE delivery_id = p_delivery_id;
+
+            -- 3. Zmień status dostawy na 'cancelled' (zamiast usuwać rekord)
+            UPDATE deliveries 
+            SET delivery_status = 'cancelled' 
+            WHERE id = p_delivery_id;
+
+            COMMIT;
+            RAISE NOTICE 'Dostawa % została anulowana, a stany magazynowe cofnięte.', p_delivery_id;
+        END;
+        $$;
+    """)
+        
     print("Tables created successfully.")

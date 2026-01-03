@@ -98,7 +98,7 @@ class Product:
         try:
             cur = self.conn.cursor()
             query = """
-                SELECT * FROM products;
+                SELECT * FROM v_all_products;
             """
             cur.execute(query)
             rows = cur.fetchall()
