@@ -1,7 +1,11 @@
+import psycopg2
+
 def init_tables(cur):
     print("Initializing database schema...")
 
-    # Enums
+    # ---------------------------------------------------------
+    # 1. Tworzenie Typów Enum (Słowniki)
+    # ---------------------------------------------------------
     enum_queries = [
         """
         DO $$ BEGIN
@@ -14,7 +18,16 @@ def init_tables(cur):
         """,
         """
         DO $$ BEGIN
-            CREATE TYPE ledger_status AS ENUM (
+            CREATE TYPE document_type AS ENUM (
+                'PZ', 'WZ', 'PW', 'RW'
+            );
+        EXCEPTION
+            WHEN duplicate_object THEN null;
+        END $$;
+        """,
+        """
+        DO $$ BEGIN
+            CREATE TYPE delivery_status AS ENUM (
                 'pending', 'in_progress', 'completed', 'cancelled'
             );
         EXCEPTION
@@ -35,7 +48,11 @@ def init_tables(cur):
     for query in enum_queries:
         cur.execute(query)
 
-    # Independent tables
+    # ---------------------------------------------------------
+    # 2. Tabele Niezależne (Słowniki i Podmioty)
+    # ---------------------------------------------------------
+    
+    # Users (Zmiana nazwy na liczbę mnogą dla uniknięcia konfliktu ze słowem 'user')
     cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -57,6 +74,17 @@ def init_tables(cur):
         );
     """)
 
+    # NOWA TABELA: Customers
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS customers (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR NOT NULL,
+            nip VARCHAR,
+            contact_email VARCHAR,
+            address TEXT
+        );
+    """)
+
     cur.execute("""
         CREATE TABLE IF NOT EXISTS manufacturers (
             id SERIAL PRIMARY KEY,
@@ -67,48 +95,93 @@ def init_tables(cur):
         );
     """)
 
-    # Dependent tables
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS invoices (
+            id SERIAL PRIMARY KEY,
+            invoice_number VARCHAR,
+            net_cost DECIMAL(10, 2),
+            gross_cost DECIMAL(10, 2)
+        );
+    """)
+
+    # ---------------------------------------------------------
+    # 3. Tabele Zależne (Produkty i Dokumenty)
+    # ---------------------------------------------------------
+
+    # Products (Zależy od manufacturers)
     cur.execute("""
         CREATE TABLE IF NOT EXISTS products (
             id SERIAL PRIMARY KEY,
             sku VARCHAR UNIQUE NOT NULL,
             name VARCHAR NOT NULL,
-            quantity INTEGER DEFAULT 0,
             description TEXT,
             specifications JSONB,
-            supplier_id INTEGER REFERENCES suppliers(id) ON DELETE SET NULL,
             manufacturer_id INTEGER REFERENCES manufacturers(id) ON DELETE SET NULL,
             reorder_level INTEGER DEFAULT 10,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     """)
 
+    # Documents (Zależy od invoices)
+    # document_id to np. string 'PZ/01/2025'
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS inventory_batches (
+        CREATE TABLE IF NOT EXISTS documents (
             id SERIAL PRIMARY KEY,
-            product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
-            supplier_id INTEGER REFERENCES suppliers(id) ON DELETE SET NULL,
-            cost_price DECIMAL(10, 2) NOT NULL,
-            original_quantity INTEGER NOT NULL,
-            remaining_quantity INTEGER NOT NULL,
-            received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            document_number VARCHAR, 
+            invoice_id INTEGER REFERENCES invoices(id) ON DELETE SET NULL,
+            document_date TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            document_type document_type
         );
     """)
 
+    # ---------------------------------------------------------
+    # 4. Tabele Transakcyjne (Dostawy i Ruchy Magazynowe)
+    # ---------------------------------------------------------
+
+    # Deliveries (Główna tabela operacyjna)
+    # Łączy Users, Documents, Suppliers, Customers
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS inventory_ledger (
+        CREATE TABLE IF NOT EXISTS deliveries (
             id SERIAL PRIMARY KEY,
-            product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-            batch_id INTEGER REFERENCES inventory_batches(id) ON DELETE SET NULL,
             user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-            quantity_change INTEGER NOT NULL,
-            transaction_type transaction_type NOT NULL,
-            status ledger_status DEFAULT 'pending',
-            unit_cost DECIMAL(10, 2) NOT NULL,
-            unit_price DECIMAL(10, 2) DEFAULT 0,
-            transaction_date TIMESTAMP,
+            document_id INTEGER REFERENCES documents(id) ON DELETE SET NULL,
+            supplier_id INTEGER REFERENCES suppliers(id) ON DELETE SET NULL,
+            customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+            delivery_status delivery_status DEFAULT 'pending',
+            transaction_type transaction_type,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     """)
+
+    # Product Rows (Historia transakcji - Ledger)
+    # Immutable (raczej nie edytujemy po fakcie)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS product_rows (
+            id SERIAL PRIMARY KEY,
+            product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+            delivery_id INTEGER REFERENCES deliveries(id) ON DELETE CASCADE,
+            single_price DECIMAL(10, 2),
+            quantity INTEGER,
+            total_price DECIMAL(10, 2),
+            transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    """)
+
+    # Product Batches (Aktualny stan magazynowy per partia - dla FIFO)
+    # Mutable (zmniejszamy quantity przy wydawaniu)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS product_batches (
+            id SERIAL PRIMARY KEY,
+            product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+            delivery_id INTEGER REFERENCES deliveries(id) ON DELETE CASCADE,
+            quantity INTEGER DEFAULT 1,
+            single_price DECIMAL(10, 2),
+            transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    """)
+
+
+    # Implement TRIGGER, VIEW, PROCEDURE, FUNCTION, TRANSACTION
     
     print("Tables created successfully.")
