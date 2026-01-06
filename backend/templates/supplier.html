@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-    <form method="POST" action="{{ url_for('supplier.update', supplier_id=supplier.id) }}">
+    <form method="POST" class="form" action="{{ url_for('supplier.update', supplier_id=supplier.id) }}">
         <label>
             Name:
             <input type="text" name="name" value="{{ supplier.name }}" />
@@ -30,7 +30,7 @@
     </form>
 
     <form method="POST" action="{{ url_for('supplier.delete', supplier_id=supplier.id) }}">
-        <input type="submit" value="Delete Supplier" />
+        <input type="submit" class="warning" value="Delete Supplier" />
     </form>
 
     <table>

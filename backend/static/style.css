@@ -1,3 +1,138 @@
+:root {
+    --h-padding: 2rem;
+    font-family: "Google Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-variation-settings:
+    "GRAD" 0;
+}
+
 body {
-    background-color: white;
+    background-color: #F3F4F4;
+    color: #061E29
+}
+
+a {
+    color: #1D546D;
+}
+
+h1 {
+    margin: 0;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    min-height: 96vh;
+}
+
+.nav {
+    display: flex;
+    padding: 1rem var(--h-padding);
+    justify-content: space-between;
+    align-items: center;
+
+    * {
+        text-decoration: none;
+    }
+}
+
+.nav__logo {
+    font-size: 1.25rem;
+}
+
+.nav__list {
+    display: flex;
+    list-style: none;
+    gap: 1rem;
+}
+
+.footer {
+    padding: 1rem var(--h-padding);
+}
+
+.content {
+    padding: 2rem var(--h-padding);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    align-items: flex-start;
+}
+
+.form {
+    max-width: 500px;
+
+    label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+    }
+}
+
+textarea, select, input {
+    padding: 0.25rem 0.5rem;
+    background-color: #ffffff;
+    outline: none;
+    border: none;
+    font-family: "Google Sans", sans-serif;
+}
+
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px white inset;
+}
+
+input[type='submit'] {
+    padding: 0.75em 1.5em;
+    background-color: #1D546D;
+    color: #F3F4F4;
+    outline: none;
+    border: none;
+    transition: background-color 0.2s ease-in-out;
+    font-weight: bold;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+input[type='submit']:hover {
+    background-color: #061E29;
+}
+
+.warning {
+    background-color: red !important;
+}
+
+.flash {
+    padding: 1rem 2rem;
+    margin-bottom: 1rem;
+    background-color: #5F9598;
+    color: #F3F4F4;
+    border-radius: 4px;
+}
+
+.flash::before {
+    content: "MESSAGE: ";
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #061E29;
+    padding: 0.5rem;
+}
+
+th {
+    background-color: #1D546D;
+    color: #F3F4F4;
+}
+
+tr {
+    background-color: #F3F4F4;
+}
+
+tr:nth-child(even) {
+    background-color: #eaecec;
 }

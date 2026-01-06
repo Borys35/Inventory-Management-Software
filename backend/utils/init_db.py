@@ -348,5 +348,33 @@ def init_tables(cur):
         END;
         $$;
     """)
+
+
+#     -- 1. Start Transakcji
+# BEGIN TRANSACTION;
+
+# -- Używamy konstrukcji WITH, aby przechować ID nowej dostawy
+# WITH new_delivery_insert AS (
+#     -- 2. Tworzymy nagłówek i zwracamy wygenerowane ID (RETURNING id)
+#     INSERT INTO deliveries (user_id, delivery_status)
+#     VALUES (1, 'pending') -- Tu wpisz ID użytkownika (zamiast %s)
+#     RETURNING id
+# )
+# -- 3. Wstawiamy wiersze (odpowiednik pętli w Pythonie)
+# INSERT INTO product_rows (delivery_id, product_id, quantity)
+# SELECT id, product_id, quantity
+# FROM new_delivery_insert, 
+#      (VALUES 
+#         -- Tutaj wypisujesz listę produktów (odpowiednik listy 'items')
+#         (10, 50),  -- (product_id=10, quantity=50)
+#         (12, 100), -- (product_id=12, quantity=100)
+#         (15, 5)    -- (product_id=15, quantity=5)
+#      ) AS items(product_id, quantity);
+
+# -- 4. Zatwierdź (jeśli nie było błędów)
+# COMMIT;
+
+# -- 5. Jeśli wystąpi błąd w trakcie, SQL automatycznie zrobi ROLLBACK
+# -- (W skrypcie SQL nie piszemy jawnie ROLLBACK w bloku IF, silnik bazy danych zrobi to sam przy błędzie)
         
     print("Tables created successfully.")

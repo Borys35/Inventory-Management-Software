@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-    <form method="POST" action="{{ url_for('supplier.create') }}">
+    <form method="POST" class="form" action="{{ url_for('supplier.create') }}">
         <label>
             Name:
             <input type="text" name="name" />

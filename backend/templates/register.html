@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-  <form method="POST">
+  <form method="POST" class="form">
     <label>
         Username:
         <input type="text" name="username" />
@@ -23,7 +23,7 @@
     <br />
     <label>
         Role:
-        <input type="text" name="role" />
+        <input type="text" name="role" value="warehouse-stuff" disabled />
     </label>
     <br />
     <input type="submit" value="Register" />
