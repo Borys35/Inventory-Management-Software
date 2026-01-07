@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Documents{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+        <h3>Register New Document</h3>
+        <form method="POST" action="{{ url_for('document.create_document') }}">
+            <label>Document Number (np. PZ/1/2026):</label>
+            <input type="text" name="document_number" required placeholder="Nr dokumentu">
+            
+            <label>Type:</label>
+            <select name="document_type" required style="padding: 5px;">
+                <option value="PZ">PZ (Przyjęcie od dostawcy)</option>
+                <option value="WZ">WZ (Wydanie dla klienta)</option>
+                <option value="PW">PW (Przychód wewnętrzny)</option>
+                <option value="RW">RW (Rozchód wewnętrzny)</option>
+            </select>
+            
+            <label>Date:</label>
+            <input type="date" name="document_date">
+            
+            <button type="submit" style="margin-left: 10px;">Create Document</button>
+        </form>
+    </div>
+
+    <hr>
+
+    <h3>Document Registry</h3>
+    <table border="1" cellpadding="5" cellspacing="0" style="width: 100%;">
+        <thead>
+            <tr style="background-color: #eee;">
+                <th>ID</th>
+                <th>Numer</th>
+                <th>Typ</th>
+                <th>Data dokumentu</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in documents %}
+            <tr>
+                <td>{{ doc.id }}</td>
+                <td><strong>{{ doc.document_number }}</strong></td>
+                <td>
+                    {% if doc.document_type == 'PZ' %}
+                        <span style="color: green;">PZ (Przyjęcie)</span>
+                    {% elif doc.document_type == 'WZ' %}
+                        <span style="color: blue;">WZ (Wydanie)</span>
+                    {% else %}
+                        {{ doc.document_type }}
+                    {% endif %}
+                </td>
+                <td>{{ doc.document_date }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4">Brak dokumentów. Dodaj pierwszy powyżej.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

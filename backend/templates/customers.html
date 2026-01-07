@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Customers{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <h3>Add New Customer</h3>
+    <form method="POST" class="form" action="{{ url_for('customer.create_customer') }}">
+        <label>
+            Name:
+            <input type="text" name="name" required placeholder="Company Name / Full Name" />
+        </label>
+        <br />
+        <label>
+            NIP:
+            <input type="text" name="nip" placeholder="Tax ID" />
+        </label>
+        <br />
+        <label>
+            Contact e-mail:
+            <input type="email" name="contact_email" />
+        </label>
+        <br />
+        <label>
+            Address:
+            <textarea name="address"></textarea>
+        </label>
+        <br />
+        <input type="submit" value="Add Customer" />
+    </form>
+
+    <hr />
+
+    <h3>Customer List</h3>
+    <table border="1" cellpadding="5" style="width: 100%; border-collapse: collapse;">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>NIP</th>
+            <th>Contact E-mail</th>
+            <th>Address</th>
+        </tr>
+        
+        {% for customer in customers %}
+        <tr>
+            <td>{{ customer.id }}</td>
+            <td>{{ customer.name }}</td>
+            <td>{{ customer.nip }}</td>
+            <td>{{ customer.contact_email }}</td>
+            <td>{{ customer.address }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5" style="text-align: center;">No customers found. Add one above!</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

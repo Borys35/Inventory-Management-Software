@@ -378,3 +378,4 @@ def init_tables(cur):
 # -- (W skrypcie SQL nie piszemy jawnie ROLLBACK w bloku IF, silnik bazy danych zrobi to sam przy błędzie)
         
     print("Tables created successfully.")
+

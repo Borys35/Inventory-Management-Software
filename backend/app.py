@@ -4,6 +4,11 @@ from controllers.supplier_bp import supplier_bp
 from controllers.manufacturer_bp import manufacturer_bp
 from controllers.product_bp import product_bp
 from lib.db import initialize_db_tables
+from controllers.customer_bp import customer_bp
+from controllers.document_bp import document_bp
+from controllers.invoice_bp import invoice_bp
+from controllers.delivery_bp import delivery_bp
+from controllers.inventory_bp import inventory_bp
 
 app = Flask(__name__)
 app.config.update(
@@ -17,6 +22,11 @@ app.register_blueprint(user_bp)
 app.register_blueprint(supplier_bp, url_prefix='/suppliers')
 app.register_blueprint(manufacturer_bp, url_prefix='/manufacturers')
 app.register_blueprint(product_bp, url_prefix='/products')
+app.register_blueprint(customer_bp, url_prefix='/customers')
+app.register_blueprint(document_bp, url_prefix='/documents')
+app.register_blueprint(invoice_bp, url_prefix='/invoices')
+app.register_blueprint(delivery_bp, url_prefix='/deliveries')
+app.register_blueprint(inventory_bp, url_prefix='/inventory')
 
 @app.route("/")
 def hello_world():

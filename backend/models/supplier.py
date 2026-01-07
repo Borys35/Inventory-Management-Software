@@ -2,6 +2,7 @@ class Supplier:
     def __init__(self, db_connection):
         self.conn = db_connection
     
+    # --- Funkcje od Borysa ---
     def create_supplier(self, name, contact_email, phone, address):
         try:
             cur = self.conn.cursor()
@@ -107,3 +108,7 @@ class Supplier:
             self.conn.rollback()
             print(f"Error while getting suppliers: {e}")
             return None
+
+    # --- TA FUNKCJA JEST KLUCZOWA ---
+    def get_all(self):
+        return self.get_suppliers()

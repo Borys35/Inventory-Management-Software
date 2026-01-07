@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Nowa Dostawa / Wydanie</h2>
+
+<form method="POST" action="{{ url_for('delivery.create_delivery') }}">
+    
+    <div style="background: #f4f4f4; padding: 15px; margin-bottom: 20px;">
+        <label>Rodzaj operacji:</label>
+        <select name="transaction_type" required>
+            <option value="purchase_order">Zakup (Przyjęcie)</option>
+            <option value="sales_order">Sprzedaż (Wydanie)</option>
+        </select>
+
+        <label>Dokument (np. PZ/WZ):</label>
+        <select name="document_id" required>
+            <option value="">-- Wybierz dokument --</option>
+            {% for doc in documents %}
+                <option value="{{ doc.id }}">{{ doc.document_number }} ({{ doc.document_type }})</option>
+            {% endfor %}
+        </select>
+        <br><br>
+        
+        <label>Dostawca (dla Zakupu):</label>
+        <select name="supplier_id">
+            <option value="">-- Brak --</option>
+            {% for s in suppliers %}
+                <option value="{{ s.id }}">{{ s.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Klient (dla Sprzedaży):</label>
+        <select name="customer_id">
+            <option value="">-- Brak --</option>
+            {% for c in customers %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <h3>Produkty</h3>
+    <table id="productsTable" border="1" cellpadding="5" style="width: 100%;">
+        <thead>
+            <tr>
+                <th>Produkt</th>
+                <th>Ilość</th>
+                <th>Cena jedn.</th>
+                <th>Akcja</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="product-row">
+                <td>
+                    <select name="product_id[]" required style="width: 200px;">
+                        <option value="">-- Wybierz produkt --</option>
+                        {% for p in products %}
+                            <option value="{{ p.id }}">{{ p.name }} (SKU: {{ p.sku }})</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="number" name="quantity[]" value="1" min="1" style="width: 60px;"></td>
+                <td><input type="number" name="price[]" step="0.01" value="0.00" style="width: 80px;"></td>
+                <td><button type="button" onclick="removeRow(this)">Usuń</button></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <button type="button" onclick="addProductRow()" style="margin-top: 10px;">+ Dodaj kolejny produkt</button>
+    
+    <hr>
+    <button type="submit" style="background-color: #28a745; color: white; padding: 10px 20px; border: none;">ZATWIERDŹ DOSTAWĘ</button>
+</form>
+
+<script>
+function addProductRow() {
+    var table = document.getElementById("productsTable").getElementsByTagName('tbody')[0];
+    var newRow = table.rows[0].cloneNode(true);
+    // Wyczyść wartości w nowym wierszu
+    var inputs = newRow.getElementsByTagName('input');
+    for(var i=0; i<inputs.length; i++) { inputs[i].value = ''; }
+    table.appendChild(newRow);
+}
+function removeRow(btn) {
+    var row = btn.parentNode.parentNode;
+    // Nie pozwól usunąć jedynego wiersza
+    if(row.parentNode.rows.length > 1) {
+        row.parentNode.removeChild(row);
+    }
+}
+</script>
+{% endblock %}

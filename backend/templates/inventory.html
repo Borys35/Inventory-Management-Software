@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Stan Magazynowy (Stock Levels)</h2>
+
+<table border="1" cellpadding="5" cellspacing="0" style="width: 100%; text-align: center;">
+    <thead>
+        <tr style="background-color: #333; color: white;">
+            <th>SKU</th>
+            <th>Produkt</th>
+            <th>Producent</th>
+            <th>Ilość w Magazynie</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in inventory %}
+        <tr>
+            <td>{{ item.sku }}</td>
+            <td><strong>{{ item.product_name }}</strong></td>
+            <td>{{ item.manufacturer }}</td>
+            <td style="font-size: 1.2em;">
+                {{ item.quantity }} szt.
+            </td>
+            <td>
+                {% if item.quantity <= item.reorder_level %}
+                    <span style="color: red; font-weight: bold;">⚠️ NISKI STAN</span>
+                {% else %}
+                    <span style="color: green;">OK</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">Magazyn jest pusty.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
