@@ -301,6 +301,15 @@ def init_tables(cur):
     """)
 
     cur.execute("""
+        CREATE OR REPLACE VIEW v_deliveries_products AS
+        SELECT 
+            d.id AS delivery_id
+        FROM deliveries d
+        RIGHT JOIN product_rows r ON d.id = r.delivery_id
+        GROUP BY d.id;
+    """)
+
+    cur.execute("""
         CREATE OR REPLACE VIEW v_products_to_reorder AS
         SELECT *
         FROM v_stock_levels

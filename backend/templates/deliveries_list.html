@@ -4,11 +4,12 @@
         <h2>Historia Dostaw / Wydań</h2>
         <a href="{{ url_for('delivery.create_delivery') }}"><button>+ Nowa Transakcja</button></a>
     </div>
-    <table border="1" style="width: 100%; margin-top: 20px;">
+    <table style="width: 100%; margin-top: 20px;">
         <tr>
             <th>ID</th>
             <th>Dokument</th>
             <th>Typ</th>
+            <th>Status</th>
             <th>Data</th>
         </tr>
         {% for d in deliveries %}
@@ -17,6 +18,8 @@
             <td><strong>{{ d[1] }}</strong></td>
             <td>{{ d[2] }}</td>
             <td>{{ d[3] }}</td>
+            <td>{{ d[4] }}</td>
+            <td><a href="{{url_for('delivery.get_one', delivery_id = d[0])}}">View details</a></td>
         </tr>
         {% else %}
         <tr><td colspan="4">Brak transakcji.</td></tr>

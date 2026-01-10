@@ -81,7 +81,7 @@ input:-webkit-autofill {
     -webkit-box-shadow: 0 0 0px 1000px white inset;
 }
 
-input[type='submit'] {
+button, input[type='submit'] {
     padding: 0.75em 1.5em;
     background-color: #1D546D;
     color: #F3F4F4;
@@ -94,7 +94,7 @@ input[type='submit'] {
     cursor: pointer;
 }
 
-input[type='submit']:hover {
+button, input[type='submit']:hover {
     background-color: #061E29;
 }
 

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Delivery{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <form method="POST" class="form" action="{{ url_for('delivery.update', delivery_id=delivery.id) }}">
+    
+        <label>
+            Delivery status:
+            <select name="delivery_status">
+                <option value="pending">Pending</option>
+                <option value="in_progress">In progress</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+        </label>
+        <br />
+        
+        <input type="submit" value="Update delivery status" />
+    </form>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>SKU</th>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Description</th>
+        </tr>
+        <tr>
+            <td>{{ delivery.id }}</td>
+            <td>{{ delivery.id }}</td>
+            <td>{{ delivery.id }}</td>
+            <td>{{ delivery.id }}</td>
+            <td>{{ delivery.id }}</td>
+        </tr>
+    </table>
+{% endblock %}

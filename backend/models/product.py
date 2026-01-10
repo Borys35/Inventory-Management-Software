@@ -116,7 +116,6 @@ class Product:
             cur.execute(query, (id, ))
             row = cur.fetchone()
             cur.close()
-            print(row)
             
             if row:
                 return {

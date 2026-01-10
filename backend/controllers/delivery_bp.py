@@ -18,6 +18,36 @@ def list_deliveries():
     conn.close()
     return render_template('deliveries_list.html', deliveries=deliveries)
 
+@delivery_bp.route("/<delivery_id>", methods=['GET'])
+@login_required
+def get_one(delivery_id):
+    conn = get_db_connection()
+    repo = Delivery(conn)
+    delivery = repo.get_one(delivery_id)
+    conn.close()
+    return render_template('delivery_single.html', delivery=delivery)
+
+@delivery_bp.route("/<delivery_id>", methods=['POST'])
+@login_required
+def update(delivery_id):
+    data = request.form
+    conn = get_db_connection()
+    delivery_model = Delivery(conn)
+
+    delivery_id = delivery_model.update(
+        delivery_id,
+        data.get('delivery_status')
+    )
+
+    conn.close()
+
+    if delivery_id:
+        flash(f"Delivery (ID={delivery_id}) updated successfully")
+        return redirect(url_for('delivery.get_one', delivery_id=delivery_id))
+    else:
+        flash("Incorrect data")
+        return "Delivery update failed", 400
+
 @delivery_bp.route("/create", methods=['GET', 'POST'])
 @login_required
 def create_delivery():
