@@ -13,9 +13,14 @@
       <p class="nav__logo"><a href="/">Inventory Management</a></p>
       <ul class="nav__list">
         {% if g.user %}
-          <li><span>{{ g.user['username'] }}</span>
+          <li><span>Hi, {{ g.user['username'] }}</span>
+          <li><a href="{{ url_for('inventory.stock_levels') }}">Inventory</a>
           <li><a href="{{ url_for('supplier.get_all') }}">Suppliers</a>
           <li><a href="{{ url_for('manufacturer.get_all') }}">Manufacturers</a>
+          <li><a href="{{ url_for('customer.list_customers') }}">Customers</a>
+          <li><a href="{{ url_for('delivery.list_deliveries') }}">Deliveries</a>
+          <li><a href="{{ url_for('document.list_documents') }}">Documents</a>
+          <li><a href="{{ url_for('invoice.list_invoices') }}">Invoices</a>
           <li><a href="{{ url_for('product.get_all') }}">Products</a>
           <li><a href="{{ url_for('user.logout') }}">Log Out</a>
         {% else %}
