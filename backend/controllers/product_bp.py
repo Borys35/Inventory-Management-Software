@@ -15,7 +15,7 @@ def get_all():
     manufacturer_model = Manufacturer(conn)
     supplier_model = Supplier(conn)
 
-    products = product_model.get_products()
+    products = product_model.get_all()
     manufacturers = manufacturer_model.get_manufacturers()
     suppliers = supplier_model.get_suppliers()
 
