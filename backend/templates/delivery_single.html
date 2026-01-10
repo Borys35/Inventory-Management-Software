@@ -23,18 +23,20 @@
 
     <table>
         <tr>
-            <th>ID</th>
-            <th>SKU</th>
             <th>Name</th>
+            <th>SKU</th>
             <th>Quantity</th>
-            <th>Description</th>
+            <th>Single price</th>
+            <th>Total price</th>
         </tr>
+        {% for p in products %}
         <tr>
-            <td>{{ delivery.id }}</td>
-            <td>{{ delivery.id }}</td>
-            <td>{{ delivery.id }}</td>
-            <td>{{ delivery.id }}</td>
-            <td>{{ delivery.id }}</td>
+            <td>{{ p.name }}</td>
+            <td>{{ p.sku }}</td>
+            <td>{{ p.quantity }}</td>
+            <td>{{ p.single_price }}</td>
+            <td>{{ p.total_price }}</td>
         </tr>
+        {% endfor %}
     </table>
 {% endblock %}

@@ -299,14 +299,29 @@ def init_tables(cur):
         LEFT JOIN manufacturers m ON p.manufacturer_id = m.id
         GROUP BY p.id, p.sku, p.name, p.reorder_level, m.name;
     """)
-
+    
+    cur.execute("DROP VIEW IF EXISTS v_delivery_details CASCADE;")
     cur.execute("""
-        CREATE OR REPLACE VIEW v_deliveries_products AS
-        SELECT 
-            d.id AS delivery_id
-        FROM deliveries d
-        RIGHT JOIN product_rows r ON d.id = r.delivery_id
-        GROUP BY d.id;
+        CREATE OR REPLACE VIEW v_delivery_details AS
+        SELECT
+            d.id AS delivery_id,
+                
+            pr.id AS row_id,
+            pr.quantity,
+            pr.single_price,
+            pr.total_price,
+            
+            -- Product Details (Joined from products table)
+            p.name AS product_name,
+            p.sku AS product_sku,
+            p.description AS product_description
+
+        FROM 
+            product_rows pr
+        JOIN 
+            deliveries d ON pr.delivery_id = d.id
+        JOIN 
+            products p ON pr.product_id = p.id;
     """)
 
     cur.execute("""

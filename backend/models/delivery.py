@@ -74,14 +74,45 @@ class Delivery:
             """
             cur.execute(query, (id, ))
             row = cur.fetchone()
+
+            query = """
+                SELECT * FROM v_delivery_details WHERE delivery_id = %s
+            """
+            # cur.execute(query)
+            cur.execute(query, (id, ))
+            rows = cur.fetchall()
             cur.close()
-            
-            if row:
-                return {
+
+            products = []
+            for r in rows:
+                products.append({
+                    'name': r[5],
+                    'sku': r[6],
+                    'quantity': r[2],
+                    'single_price': r[3],
+                    'total_price': r[4],
+                })
+
+            # response = {
+            #     'delivery': {
+            #         'id': row[0],
+            #         'delivery_status': row[1],
+            #         'transaction_type': row[2],
+            #     },
+            #     'products': products
+            # }
+
+            response = [
+                {
                     'id': row[0],
                     'delivery_status': row[1],
                     'transaction_type': row[2],
-                }
+                }, 
+                products
+            ]
+            
+            if row:
+                return response
             return None
         except Exception as e:
             self.conn.rollback()

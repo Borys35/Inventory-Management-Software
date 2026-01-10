@@ -23,9 +23,9 @@ def list_deliveries():
 def get_one(delivery_id):
     conn = get_db_connection()
     repo = Delivery(conn)
-    delivery = repo.get_one(delivery_id)
+    [delivery, products] = repo.get_one(delivery_id)
     conn.close()
-    return render_template('delivery_single.html', delivery=delivery)
+    return render_template('delivery_single.html', delivery=delivery, products=products)
 
 @delivery_bp.route("/<delivery_id>", methods=['POST'])
 @login_required
