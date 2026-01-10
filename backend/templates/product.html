@@ -25,7 +25,7 @@
         </label>
         <br />
         
-        <label>
+        {# <label>
             Supplier ID:
             <select name="supplier_id">
                 {% for supplier in suppliers %}
@@ -33,13 +33,13 @@
                 {% endfor %}
             </select>
         </label>
-        <br />
+        <br /> #}
         
         <label>
             Manufacturer ID:
             <select name="manufacturer_id">
                 {% for manufacturer in manufacturers %}
-                    <option value="{{ manufacturer.id }}" selected="{{ manufacturer.id == product.manufacturer_id }}">{{ manufacturer.name }}</option>
+                    <option value="{{ manufacturer.id }}" {{ "selected" if manufacturer.id == product.manufacturer_id else "" }} >{{ manufacturer.name }}</option>
                 {% endfor %}
             </select>
         </label>

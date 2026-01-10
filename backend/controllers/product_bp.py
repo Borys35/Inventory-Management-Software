@@ -46,11 +46,11 @@ def create():
     conn = get_db_connection()
     product_model = Product(conn)
 
-    product_id = product_model.create_product(
+    product_id = product_model.create(
         data.get('sku'),
         data.get('name'),
         data.get('description'),
-        data.get('supplier_id'),
+        # data.get('supplier_id'),
         data.get('manufacturer_id'),
         data.get('reorder_level')
     )
@@ -95,8 +95,8 @@ def update(product_id):
         data.get('sku'),
         data.get('name'),
         data.get('description'),
-        data.get('supplier_id'),
-        data.get('product_id'),
+        # data.get('supplier_id'),
+        data.get('manufacturer_id'),
         data.get('reorder_level')
     )
 
