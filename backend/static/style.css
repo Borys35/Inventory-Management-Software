@@ -8,7 +8,7 @@
 
 body {
     background-color: #F3F4F4;
-    color: #061E29
+    color: #061E29;
 }
 
 a {
@@ -61,6 +61,8 @@ h1 {
 
 .form {
     max-width: 500px;
+    padding: 1rem;
+    border: 1px solid #061E29;
 
     label {
         display: flex;

@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 
+{% block header %}
+  <h1>{% block title %}Stock Levels{% endblock %}</h1>
+{% endblock %}
+
 {% block content %}
-<h2>Stan Magazynowy (Stock Levels)</h2>
 
 <div style="margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 5px;">
     <form class="filter-form" method="GET" action="{{ url_for('inventory.stock_levels') }}">

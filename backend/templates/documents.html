@@ -5,30 +5,29 @@
 {% endblock %}
 
 {% block content %}
-    <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-        <h3>Register New Document</h3>
-        <form method="POST" action="{{ url_for('document.create_document') }}">
-            <label>Document Number (np. PZ/1/2026):</label>
-            <input type="text" name="document_number" required placeholder="Nr dokumentu">
-            
-            <label>Type:</label>
+    <div>
+        <form class="form" method="POST" action="{{ url_for('document.create_document') }}">
+            <label>Document Number (np. PZ/1/2026)
+            <input type="text" name="document_number" required placeholder="Nr dokumentu"/>
+            </label>
+            <br/>
+            <label>Type
             <select name="document_type" required style="padding: 5px;">
                 <option value="PZ">PZ (Przyjęcie od dostawcy)</option>
                 <option value="WZ">WZ (Wydanie dla klienta)</option>
                 <option value="PW">PW (Przychód wewnętrzny)</option>
                 <option value="RW">RW (Rozchód wewnętrzny)</option>
             </select>
-            
-            <label>Date:</label>
-            <input type="date" name="document_date">
-            
-            <button type="submit" style="margin-left: 10px;">Create Document</button>
+            </label>
+            <br/>
+            <label>Date
+                <input type="date" name="document_date" />
+            </label>
+            <br/>
+            <button type="submit">Create Document</button>
         </form>
     </div>
 
-    <hr>
-
-    <h3>Document Registry</h3>
     <table border="1" cellpadding="5" cellspacing="0" style="width: 100%;">
         <thead>
             <tr style="background-color: #eee;">

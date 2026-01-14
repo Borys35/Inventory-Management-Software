@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 
+{% block header %}
+  <h1>{% block title %}Nowa dostawa / wydanie{% endblock %}</h1>
+{% endblock %}
+
 {% block content %}
-<h2>Nowa Dostawa / Wydanie</h2>
 
 <form method="POST" action="{{ url_for('delivery.create_delivery') }}">
     

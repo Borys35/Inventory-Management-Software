@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
+{% block header %}
+  <h1>{% block title %}Deliveries{% endblock %}</h1>
+{% endblock %}
 {% block content %}
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h2>Historia Dostaw / Wydań</h2>
+    <div>
         <a href="{{ url_for('delivery.create_delivery') }}"><button>+ Nowa Transakcja</button></a>
     </div>
     <table style="width: 100%; margin-top: 20px;">
