@@ -38,17 +38,42 @@ def get_all():
 @login_required
 def create():
     data = request.form
+    
+    # --- WALIDACJA ---
+    name = data.get('name')
+    sku = data.get('sku')
+    reorder_level = data.get('reorder_level')
+
+    # 1. Pola obowiązkowe
+    if not name or not sku:
+        flash("Validation Error: Name and SKU are required fields!")
+        return redirect(url_for('product.get_all'))
+    
+    # 2. Długość nazwy
+    if len(name) < 3:
+        flash("Validation Error: Product name is too short (min. 3 characters)!")
+        return redirect(url_for('product.get_all'))
+
+    # 3. Liczba dodatnia
+    try:
+        r_level = int(reorder_level)
+        if r_level < 0:
+            flash("Validation Error: Reorder level cannot be negative!")
+            return redirect(url_for('product.get_all'))
+    except (ValueError, TypeError):
+        flash("Validation Error: Reorder level must be a valid number!")
+        return redirect(url_for('product.get_all'))
+    # --- KONIEC WALIDACJI ---
+
     conn = get_db_connection()
     product_model = Product(conn)
 
-    # Upewnij się, że nazwy pól w data.get() pasują do 'name="..."' w HTML
     product_id = product_model.create(
-        data.get('sku'),
-        data.get('name'),
+        sku,
+        name,
         data.get('description'),
-        # data.get('supplier_id'),
         data.get('manufacturer_id'),
-        data.get('reorder_level')
+        r_level
     )
 
     conn.close()
@@ -56,7 +81,7 @@ def create():
     if product_id:
         flash("Product created successfully")
     else:
-        flash("Error creating product")
+        flash("Error creating product (Database Error)")
     
     return redirect(url_for('product.get_all'))
 
