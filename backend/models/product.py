@@ -2,14 +2,33 @@ class Product:
     def __init__(self, db_connection):
         self.conn = db_connection
     
-    def get_all(self):
+    def get_all(self, search_query=None):
         try:
             cur = self.conn.cursor()
-            # Pobieramy produkty
-            cur.execute("SELECT * FROM products ORDER BY id DESC;")
+            
+            # Podstawowe zapytanie
+            query = """
+                SELECT p.id, p.sku, p.name, p.description, p.reorder_level, m.name as manufacturer
+                FROM products p
+                LEFT JOIN manufacturers m ON p.manufacturer_id = m.id
+            """
+            
+            params = ()
+            
+            # Jeśli jest wyszukiwanie, doklejamy warunek WHERE
+            if search_query:
+                query += " WHERE p.name ILIKE %s OR p.sku ILIKE %s"
+                # Dodajemy % z obu stron dla wyszukiwania "zawiera frazę"
+                search_term = f"%{search_query}%"
+                params = (search_term, search_term)
+            
+            query += " ORDER BY p.id ASC;"
+            
+            cur.execute(query, params)
             rows = cur.fetchall()
             cur.close()
-            
+
+            # Mapowanie wyników (zostaje po staremu, ale upewnij się że pasuje do Twojej bazy)
             products = []
             for row in rows:
                 products.append({
@@ -17,13 +36,12 @@ class Product:
                     'sku': row[1],
                     'name': row[2],
                     'description': row[3],
-                    # row[4] to specifications (json), pomijamy
-                    'manufacturer_id': row[5],
-                    'reorder_level': row[6]
+                    'reorder_level': row[4],
+                    'manufacturer_name': row[5]
                 })
             return products
         except Exception as e:
-            print(f"Błąd pobierania produktów: {e}")
+            print(f"Error getting products: {e}")
             return []
 
     def create(self, sku, name, description, manufacturer_id, reorder_level):

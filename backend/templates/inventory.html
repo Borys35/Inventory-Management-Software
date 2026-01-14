@@ -3,27 +3,40 @@
 {% block content %}
 <h2>Stan Magazynowy (Stock Levels)</h2>
 
+<div style="margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 5px;">
+    <form method="GET" action="{{ url_for('inventory.stock_levels') }}" style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" name="search" placeholder="Szukaj po nazwie lub SKU..." 
+               value="{{ search_query }}" style="padding: 8px; width: 300px;">
+        
+        <button type="submit" style="padding: 8px 15px; cursor: pointer;">Filtruj</button>
+        
+        {% if search_query %}
+            <a href="{{ url_for('inventory.stock_levels') }}">
+                <button type="button" style="padding: 8px 15px; background-color: #6c757d; color: white; border: none; cursor: pointer;">Pokaż wszystko</button>
+            </a>
+        {% endif %}
+    </form>
+</div>
 <table border="1" cellpadding="5" cellspacing="0" style="width: 100%; text-align: center;">
     <thead>
         <tr style="background-color: #333; color: white;">
             <th>SKU</th>
             <th>Produkt</th>
-            <th>Producent</th>
             <th>Ilość w Magazynie</th>
             <th>Status</th>
         </tr>
     </thead>
     <tbody>
-        {% for item in inventory %}
+        {% for item in stock %}
         <tr>
             <td>{{ item.sku }}</td>
             <td><strong>{{ item.product_name }}</strong></td>
-            <td>{{ item.manufacturer }}</td>
             <td style="font-size: 1.2em;">
-                {{ item.quantity }} szt.
+                {{ item.current_quantity }} szt.
             </td>
+            
             <td>
-                {% if item.quantity <= item.reorder_level %}
+                {% if item.current_quantity <= item.reorder_level %}
                     <span style="color: red; font-weight: bold;">⚠️ NISKI STAN</span>
                 {% else %}
                     <span style="color: green;">OK</span>
@@ -31,7 +44,7 @@
             </td>
         </tr>
         {% else %}
-        <tr><td colspan="5">Magazyn jest pusty.</td></tr>
+        <tr><td colspan="4">Brak produktów spełniających kryteria.</td></tr>
         {% endfor %}
     </tbody>
 </table>

@@ -1,29 +1,23 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request, g, redirect, url_for
 from lib.db import get_db_connection
 from lib.auth_middleware import login_required
+from models.inventory import Inventory  # Importujemy nowy model
 
-inventory_bp = Blueprint('inventory', __name__)
+inventory_bp = Blueprint('inventory', __name__, url_prefix='/inventory')
 
-@inventory_bp.route("/", methods=['GET'])
+@inventory_bp.route('/', methods=['GET'])
 @login_required
 def stock_levels():
+    # Pobieramy to co wpisał user
+    search_query = request.args.get('search', '')
+
     conn = get_db_connection()
-    cur = conn.cursor()
-    # Pobieramy dane z widoku, który sumuje partie towaru (Tabela 10)
-    cur.execute("SELECT * FROM v_stock_levels ORDER BY total_quantity DESC;")
-    rows = cur.fetchall()
-    cur.close()
+    repo = Inventory(conn)
+    
+    # Przekazujemy frazę do bazy
+    stock = repo.get_stock_levels(search_query)
+    
     conn.close()
     
-    inventory = []
-    for row in rows:
-        inventory.append({
-            'product_id': row[0],
-            'sku': row[1],
-            'product_name': row[2],
-            'quantity': row[3],
-            'reorder_level': row[4],
-            'manufacturer': row[5]
-        })
-
-    return render_template('inventory.html', inventory=inventory)
+    # Zwracamy listę + search_query (żeby zostało w pasku wyszukiwania)
+    return render_template('inventory.html', stock=stock, search_query=search_query)

@@ -54,6 +54,24 @@
         <input type="submit" value="Create Product" />
     </form>
 
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #ccc;">
+
+    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f0f0; border-radius: 5px;">
+        <h3 style="margin-top: 0;">Filter Products</h3>
+        <form method="GET" action="{{ url_for('product.get_all') }}" style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" name="search" placeholder="Search by Name or SKU..." 
+                   value="{{ search_query }}" style="padding: 8px; width: 300px;">
+            
+            <button type="submit" style="padding: 8px 15px; cursor: pointer; background-color: #1D546D; color: white; border: none;">Search</button>
+            
+            {% if search_query %}
+                <a href="{{ url_for('product.get_all') }}">
+                    <button type="button" style="padding: 8px 15px; background-color: #6c757d; color: white; border: none; cursor: pointer;">Clear Filter</button>
+                </a>
+            {% endif %}
+        </form>
+    </div>
+
     <table>
         <tr>
             <th>ID</th>
