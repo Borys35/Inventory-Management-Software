@@ -4,9 +4,17 @@
 <h2>Stan Magazynowy (Stock Levels)</h2>
 
 <div style="margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border-radius: 5px;">
-    <form method="GET" action="{{ url_for('inventory.stock_levels') }}" style="display: flex; gap: 10px; align-items: center;">
-        <input type="text" name="search" placeholder="Szukaj po nazwie lub SKU..." 
-               value="{{ search_query }}" style="padding: 8px; width: 300px;">
+    <form class="filter-form" method="GET" action="{{ url_for('inventory.stock_levels') }}">
+        <label for="search">
+            Wyszukiwarka
+            <input id="search" type="text" name="search" placeholder="Szukaj po nazwie lub SKU..." 
+               value="{{ search_query }}" style="padding: 8px; width: 300px;" />
+        </label>
+        
+        <label for="restock">
+            Tylko niski stan
+            <input type="checkbox" name="restock" id="restock" {% if restock %}checked{% endif %} />
+        </label>
         
         <button type="submit" style="padding: 8px 15px; cursor: pointer;">Filtruj</button>
         
@@ -23,6 +31,7 @@
             <th>SKU</th>
             <th>Produkt</th>
             <th>Ilość w Magazynie</th>
+            <th>Wartość (total)</th>
             <th>Status</th>
         </tr>
     </thead>
@@ -34,6 +43,7 @@
             <td style="font-size: 1.2em;">
                 {{ item.current_quantity }} szt.
             </td>
+            <td>{{ item.total_price }} zł</td>
             
             <td>
                 {% if item.current_quantity <= item.reorder_level %}

@@ -285,14 +285,16 @@ def init_tables(cur):
     """)
 
     # VIEW
+    cur.execute("DROP VIEW IF EXISTS v_stock_levels CASCADE;")
     cur.execute("""
         CREATE OR REPLACE VIEW v_stock_levels AS
         SELECT 
             p.id AS product_id,
-            p.sku,
+            p.sku AS sku,
             p.name AS product_name,
             COALESCE(SUM(pb.quantity), 0) AS total_quantity, -- COALESCE zamienia NULL na 0
-            p.reorder_level,
+            COALESCE(SUM(pb.quantity * pb.single_price), 0) AS total_value,
+            p.reorder_level AS reorder_level,
             m.name AS manufacturer_name
         FROM products p
         LEFT JOIN product_batches pb ON p.id = pb.product_id

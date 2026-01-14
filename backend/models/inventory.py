@@ -2,37 +2,44 @@ class Inventory:
     def __init__(self, db_connection):
         self.conn = db_connection
 
-    def get_stock_levels(self, search_query=None):
+    def get_stock_levels(self, search_query=None, restock_query=None):
         try:
             cur = self.conn.cursor()
             
-            # Zakładam, że masz widok v_stock_levels albo pobieramy z produktów
-            # Jeśli nie masz widoku, to zapytanie pobierze po prostu produkty
             query = """
-                SELECT p.name, p.sku, 0 as current_quantity, p.reorder_level
-                FROM products p
+                SELECT *
+                FROM v_stock_levels
             """
             
-            params = ()
+            conditions = []
+            params = []
 
             if search_query:
-                query += " WHERE p.name ILIKE %s OR p.sku ILIKE %s"
+                conditions.append("(product_name ILIKE %s OR sku ILIKE %s)")
                 search_term = f"%{search_query}%"
-                params = (search_term, search_term)
+                params.extend([search_term, search_term])
             
-            query += " ORDER BY p.name ASC;"
+            if restock_query:
+                conditions.append("total_quantity <= reorder_level")
 
-            cur.execute(query, params)
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+            
+            query += " ORDER BY product_name ASC;"
+
+            cur.execute(query, tuple(params))
             rows = cur.fetchall()
             cur.close()
 
             stock = []
             for row in rows:
                 stock.append({
-                    'product_name': row[0],
+                    'product_name': row[2],
                     'sku': row[1],
-                    'current_quantity': row[2], # Tu docelowo będzie suma z magazynu
-                    'reorder_level': row[3]
+                    'current_quantity': row[3],
+                    'total_price': row[4],
+                    'reorder_level': row[5],
+                    'manufacturer': row[6]
                 })
             return stock
         except Exception as e:

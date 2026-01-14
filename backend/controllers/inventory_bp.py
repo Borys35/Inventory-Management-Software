@@ -10,14 +10,15 @@ inventory_bp = Blueprint('inventory', __name__, url_prefix='/inventory')
 def stock_levels():
     # Pobieramy to co wpisał user
     search_query = request.args.get('search', '')
+    restock_query = request.args.get('restock', '')
 
     conn = get_db_connection()
     repo = Inventory(conn)
     
     # Przekazujemy frazę do bazy
-    stock = repo.get_stock_levels(search_query)
+    stock = repo.get_stock_levels(search_query, restock_query)
     
     conn.close()
     
     # Zwracamy listę + search_query (żeby zostało w pasku wyszukiwania)
-    return render_template('inventory.html', stock=stock, search_query=search_query)
+    return render_template('inventory.html', stock=stock, search_query=search_query, restock=restock_query)
