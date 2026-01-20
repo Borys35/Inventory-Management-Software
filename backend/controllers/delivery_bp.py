@@ -95,7 +95,7 @@ def create_delivery():
                 invoice = inv_model.get_by_id(document['invoice_id'])
                 
                 if invoice:
-                    limit = float(invoice['gross_cost'])
+                    limit = float(invoice['net_cost'])
                     
                     # 1. Pobieramy sumę WCZEŚNIEJSZYCH dostaw dla tego dokumentu
                     cur = conn.cursor()

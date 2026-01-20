@@ -26,7 +26,7 @@
             <select name="invoice_id" style="padding: 5px;">
                 <option value="">-- Brak --</option>
                 {% for inv in invoices %}
-                    <option value="{{ inv.id }}">{{ inv.invoice_number }} ({{ inv.gross_cost }} PLN)</option>
+                    <option value="{{ inv.id }}">{{ inv.invoice_number }} ({{ inv.net_cost }} PLN netto)</option>
                 {% endfor %}
             </select>
             </label>

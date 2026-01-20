@@ -39,7 +39,6 @@ class Invoice:
             print(f"Error creating invoice: {e}")
             return None
 
-    # --- NOWA METODA ---
     def get_by_id(self, id):
         try:
             cur = self.conn.cursor()
@@ -53,7 +52,7 @@ class Invoice:
                     'id': row[0],
                     'invoice_number': row[1],
                     'net_cost': row[2],
-                    'gross_cost': row[3] # To jest dla nas najważniejsze
+                    'gross_cost': row[3]
                 }
             return None
         except Exception as e:
