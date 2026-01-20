@@ -1,10 +1,153 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h1>{% block title %}Inventory Management System{% endblock %}</h1>
+  <h1>{% block title %}Dashboard{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
-  Advanced inventory management system built with Flask and PostgreSQL.
-  <a href="https://github.com/Borys35/Inventory-Management-Software" target="_blank">View source code here</a>
+<style>
+    /* Prosty styl dla kafelków */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    .card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        text-align: center;
+        border-top: 4px solid #1D546D;
+    }
+
+    .card h3 {
+        margin: 0;
+        color: #666;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .card p {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin: 10px 0;
+        color: #333;
+    }
+
+    /* Kolory dla alertów */
+    .card.alert {
+        border-top-color: #dc3545;
+        background-color: #fff5f5;
+    }
+    
+    .card.alert p {
+        color: #dc3545;
+    }
+
+    .card.success {
+        border-top-color: #28a745;
+    }
+
+    /* Tabela aktywności */
+    .activity-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    .activity-table th {
+        background-color: #f8f9fa;
+        color: #333;
+        font-weight: 600;
+        text-align: left;
+        padding: 12px;
+        border-bottom: 2px solid #eee;
+    }
+    .activity-table td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        color: #555;
+    }
+    .activity-table tr:last-child td {
+        border-bottom: none;
+    }
+</style>
+
+<div class="dashboard-grid">
+    <div class="card success">
+        <h3>Wartość Magazynu</h3>
+        <p>{{ total_value }} PLN</p>
+    </div>
+
+    <div class="card {% if low_stock_count > 0 %}alert{% endif %}">
+        <h3>Niski Stan (Alert)</h3>
+        <p>{{ low_stock_count }}</p>
+        {% if low_stock_count > 0 %}
+            <a href="{{ url_for('inventory.stock_levels', restock='on') }}" style="font-size: 0.85em; color: #dc3545; font-weight: bold; text-decoration: none;">
+                Sprawdź braki &rarr;
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Wszystkie Produkty</h3>
+        <p>{{ total_products }}</p>
+    </div>
+</div>
+
+<h3 style="margin-bottom: 15px; color: #444;">Ostatnia Aktywność (5 transakcji)</h3>
+<table class="activity-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Typ Transakcji</th>
+            <th>Status</th>
+            <th>Data</th>
+            <th>Akcja</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for act in recent_activities %}
+        <tr>
+            <td>#{{ act[0] }}</td>
+            <td>
+                {% if act[1] == 'purchase_order' %}
+                    <span style="color: green; font-weight: 500;">🔻 Zakup (Przyjęcie)</span>
+                {% elif act[1] == 'sales_order' %}
+                    <span style="color: blue; font-weight: 500;">🔺 Sprzedaż (Wydanie)</span>
+                {% else %}
+                    {{ act[1] }}
+                {% endif %}
+            </td>
+            <td>
+                {% if act[2] == 'completed' %}
+                    <span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">Zakończona</span>
+                {% elif act[2] == 'pending' %}
+                    <span style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">Oczekująca</span>
+                {% else %}
+                    {{ act[2] }}
+                {% endif %}
+            </td>
+            <td>{{ act[3].strftime('%Y-%m-%d %H:%M') }}</td>
+            <td><a href="{{ url_for('delivery.get_one', delivery_id=act[0]) }}" style="text-decoration: none; color: #1D546D; font-weight: bold;">Szczegóły</a></td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5" style="text-align: center; color: #999; padding: 20px;">Brak ostatniej aktywności.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div style="margin-top: 40px; text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
+    <a href="https://github.com/Borys35/Inventory-Management-Software" target="_blank" style="color: #999; text-decoration: none; font-size: 0.8em;">
+        Inventory Management System v1.0
+    </a>
+</div>
 {% endblock %}

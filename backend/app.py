@@ -3,7 +3,7 @@ from controllers.user_bp import user_bp
 from controllers.supplier_bp import supplier_bp
 from controllers.manufacturer_bp import manufacturer_bp
 from controllers.product_bp import product_bp
-from lib.db import initialize_db_tables
+from lib.db import initialize_db_tables, get_db_connection # <--- Dodano get_db_connection
 from controllers.customer_bp import customer_bp
 from controllers.document_bp import document_bp
 from controllers.invoice_bp import invoice_bp
@@ -30,4 +30,36 @@ app.register_blueprint(inventory_bp, url_prefix='/inventory')
 
 @app.route("/")
 def hello_world():
-    return render_template('index.html')
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # 1. Pobierz łączną wartość magazynu (korzystamy z widoku v_inventory_value)
+    cur.execute("SELECT SUM(total_value) FROM v_inventory_value;")
+    # Jeśli wynik to None (pusta baza), wstawiamy 0.0
+    total_value = cur.fetchone()[0] or 0.0
+
+    # 2. Pobierz liczbę produktów z niskim stanem
+    cur.execute("SELECT COUNT(*) FROM v_products_to_reorder;")
+    low_stock_count = cur.fetchone()[0] or 0
+
+    # 3. Pobierz ogólną liczbę produktów
+    cur.execute("SELECT COUNT(*) FROM products;")
+    total_products = cur.fetchone()[0] or 0
+
+    # 4. Pobierz 5 ostatnich transakcji (dla podglądu)
+    cur.execute("""
+        SELECT d.id, d.transaction_type, d.delivery_status, d.created_at 
+        FROM deliveries d 
+        ORDER BY d.created_at DESC 
+        LIMIT 5;
+    """)
+    recent_activities = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return render_template('index.html', 
+                           total_value=round(total_value, 2),
+                           low_stock_count=low_stock_count,
+                           total_products=total_products,
+                           recent_activities=recent_activities)
