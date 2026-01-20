@@ -11,6 +11,7 @@
             <input type="text" name="document_number" required placeholder="Nr dokumentu"/>
             </label>
             <br/>
+            
             <label>Type
             <select name="document_type" required style="padding: 5px;">
                 <option value="PZ">PZ (Przyjęcie od dostawcy)</option>
@@ -20,6 +21,17 @@
             </select>
             </label>
             <br/>
+
+            <label>Powiązana Faktura (Opcjonalnie)
+            <select name="invoice_id" style="padding: 5px;">
+                <option value="">-- Brak --</option>
+                {% for inv in invoices %}
+                    <option value="{{ inv.id }}">{{ inv.invoice_number }} ({{ inv.gross_cost }} PLN)</option>
+                {% endfor %}
+            </select>
+            </label>
+            <br/>
+            
             <label>Date
                 <input type="date" name="document_date" />
             </label>
@@ -28,13 +40,13 @@
         </form>
     </div>
 
-    <table border="1" cellpadding="5" cellspacing="0" style="width: 100%;">
+    <table border="1" cellpadding="5" cellspacing="0" style="width: 100%; margin-top: 20px;">
         <thead>
             <tr style="background-color: #eee;">
                 <th>ID</th>
                 <th>Numer</th>
                 <th>Typ</th>
-                <th>Data dokumentu</th>
+                <th>Powiązana Faktura</th> <th>Data dokumentu</th>
             </tr>
         </thead>
         <tbody>
@@ -51,11 +63,20 @@
                         {{ doc.document_type }}
                     {% endif %}
                 </td>
+                <td>
+                    {% if doc.invoice_number %}
+                        <a href="{{ url_for('invoice.list_invoices') }}" style="text-decoration: none; color: #333;">
+                            📎 {{ doc.invoice_number }}
+                        </a>
+                    {% else %}
+                        <span style="color: #999;">-</span>
+                    {% endif %}
+                </td>
                 <td>{{ doc.document_date }}</td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="4">Brak dokumentów. Dodaj pierwszy powyżej.</td>
+                <td colspan="5">Brak dokumentów. Dodaj pierwszy powyżej.</td>
             </tr>
             {% endfor %}
         </tbody>
