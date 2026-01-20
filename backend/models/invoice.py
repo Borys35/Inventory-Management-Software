@@ -38,3 +38,24 @@ class Invoice:
             self.conn.rollback()
             print(f"Error creating invoice: {e}")
             return None
+
+    # --- NOWA METODA ---
+    def get_by_id(self, id):
+        try:
+            cur = self.conn.cursor()
+            query = "SELECT * FROM invoices WHERE id = %s"
+            cur.execute(query, (id,))
+            row = cur.fetchone()
+            cur.close()
+            
+            if row:
+                return {
+                    'id': row[0],
+                    'invoice_number': row[1],
+                    'net_cost': row[2],
+                    'gross_cost': row[3] # To jest dla nas najważniejsze
+                }
+            return None
+        except Exception as e:
+            print(f"Error getting invoice by id: {e}")
+            return None

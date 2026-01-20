@@ -22,18 +22,30 @@ def create_invoice():
     repo = Invoice(conn)
     
     try:
-        # Konwersja na liczby (float)
-        net = float(data.get('net_cost').replace(',', '.'))
-        gross = float(data.get('gross_cost').replace(',', '.'))
+        # Pobieramy dane
+        invoice_number = data.get('invoice_number')
+        net_str = data.get('net_cost')
+        gross_str = data.get('gross_cost')
+
+        # Zabezpieczenie: Jeśli formularz nie wysłał danych (np. przez disabled)
+        if not net_str or not gross_str:
+            flash("Błąd: Brak kwoty Netto lub Brutto! Sprawdź formularz.")
+            return redirect(url_for('invoice.list_invoices'))
+
+        # Konwersja na liczby (float) - zamiana przecinka na kropkę
+        net = float(net_str.replace(',', '.'))
+        gross = float(gross_str.replace(',', '.'))
         
         repo.create(
-            data.get('invoice_number'),
+            invoice_number,
             net,
             gross
         )
         flash("Dodano fakturę!")
     except ValueError:
         flash("Błąd! Koszt musi być liczbą.")
+    except Exception as e:
+        flash(f"Wystąpił nieoczekiwany błąd: {e}")
     finally:
         conn.close()
         
